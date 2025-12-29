@@ -18,4 +18,16 @@ interface IERC20 {
     function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
 }
 
-contract SimpleDex {}
+contract SimpleDEX {
+    // 1. Define the token interfaces
+    IERC20 public immutable token0;
+    IERC20 public immutable token1;
+
+    // 2. Define the reserves
+    uint256 public reserve0;
+    uint256 public reserve1;
+
+    // 3. Define the LP Token total supply
+    uint256 public totalSupply;
+    mapping(address => uint256) public balanceOf;
+}
