@@ -30,4 +30,9 @@ contract SimpleDEX {
     // 3. Define the LP Token total supply
     uint256 public totalSupply;
     mapping(address => uint256) public balanceOf;
+
+    constructor(address _token0, address _token1) {
+        token0 = IERC20(_token0);
+        token1 = IERC20(_token1);
+    }
 }
