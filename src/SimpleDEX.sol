@@ -35,4 +35,9 @@ contract SimpleDEX {
         token0 = IERC20(_token0);
         token1 = IERC20(_token1);
     }
+
+    function _update() private {
+        reserve0 = token0.balanceOf(address(this));
+        reserve1 = token1.balanceOf(address(this));
+    }
 }
