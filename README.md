@@ -30,7 +30,7 @@ It uses the **Constant Product Formula** to determine prices and maintain pool e
 This AMM follows the invariant:
 
 \[
-x \cdot y = k
+x . y = k
 \]
 
 Where:
@@ -54,4 +54,3 @@ Fees are added back into the pool reserves, increasing LP share value over time.
 ```text
 src/
 ├── NexusSwapAMM.sol   # Core AMM logic (liquidity + swaps)
-└── IERC20.sol         # ERC-20 interface
