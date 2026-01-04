@@ -6,47 +6,22 @@ interface IERC20 {
 
     function balanceOf(address account) external view returns (uint256);
 
-    function transfer(
-        address recipient,
-        uint256 amount
-    ) external returns (bool);
+    function transfer(address recipient, uint256 amount) external returns (bool);
 
-    function allowance(
-        address owner,
-        address spender
-    ) external view returns (uint256);
+    function allowance(address owner, address spender) external view returns (uint256);
 
     function approve(address spender, uint256 amount) external returns (bool);
 
-    function transferFrom(
-        address sender,
-        address recipient,
-        uint256 amount
-    ) external returns (bool);
+    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
 }
 
 contract NexusSwapAMM {
     /*//////////////////////////////////////////////////////////////
                                 EVENTS
     //////////////////////////////////////////////////////////////*/
-    event AddLiquidity(
-        address indexed provider,
-        uint256 amountA,
-        uint256 amountB,
-        uint256 shares
-    );
-    event RemoveLiquidity(
-        address indexed provider,
-        uint256 amountA,
-        uint256 amountB,
-        uint256 shares
-    );
-    event Swap(
-        address indexed user,
-        address tokenIn,
-        uint256 amountIn,
-        uint256 amountOut
-    );
+    event AddLiquidity(address indexed provider, uint256 amountA, uint256 amountB, uint256 shares);
+    event RemoveLiquidity(address indexed provider, uint256 amountA, uint256 amountB, uint256 shares);
+    event Swap(address indexed user, address tokenIn, uint256 amountIn, uint256 amountOut);
 
     /*//////////////////////////////////////////////////////////////
                             STATE VARIABLES
@@ -90,10 +65,7 @@ contract NexusSwapAMM {
                             CORE FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
-    function addLiquidity(
-        uint256 amountA,
-        uint256 amountB
-    ) external returns (uint256 shares) {
+    function addLiquidity(uint256 amountA, uint256 amountB) external returns (uint256 shares) {
         tokenA.transferFrom(msg.sender, address(this), amountA);
         tokenB.transferFrom(msg.sender, address(this), amountB);
 
@@ -111,16 +83,11 @@ contract NexusSwapAMM {
         balanceOf[msg.sender] += shares;
         totalSupply += shares;
 
-        _update(
-            tokenA.balanceOf(address(this)),
-            tokenB.balanceOf(address(this))
-        );
+        _update(tokenA.balanceOf(address(this)), tokenB.balanceOf(address(this)));
         emit AddLiquidity(msg.sender, amountA, amountB, shares);
     }
 
-    function removeLiquidity(
-        uint256 shares
-    ) external returns (uint256 amountA, uint256 amountB) {
+    function removeLiquidity(uint256 shares) external returns (uint256 amountA, uint256 amountB) {
         require(shares > 0, "Invalid shares");
 
         amountA = (shares * reserveA) / totalSupply;
@@ -132,20 +99,12 @@ contract NexusSwapAMM {
         tokenA.transfer(msg.sender, amountA);
         tokenB.transfer(msg.sender, amountB);
 
-        _update(
-            tokenA.balanceOf(address(this)),
-            tokenB.balanceOf(address(this))
-        );
+        _update(tokenA.balanceOf(address(this)), tokenB.balanceOf(address(this)));
         emit RemoveLiquidity(msg.sender, amountA, amountB, shares);
     }
 
-    function getAmountOut(
-        uint256 amountIn,
-        bool isTokenA
-    ) public view returns (uint256 amountOut) {
-        (uint256 reserveIn, uint256 reserveOut) = isTokenA
-            ? (reserveA, reserveB)
-            : (reserveB, reserveA);
+    function getAmountOut(uint256 amountIn, bool isTokenA) public view returns (uint256 amountOut) {
+        (uint256 reserveIn, uint256 reserveOut) = isTokenA ? (reserveA, reserveB) : (reserveB, reserveA);
 
         // Fee calculation: 0.3% (997/1000)
         // Multiply first, divide last to maintain precision
@@ -156,11 +115,7 @@ contract NexusSwapAMM {
         amountOut = numerator / denominator;
     }
 
-    function swap(
-        address tokenIn,
-        uint256 amountIn,
-        uint256 minAmountOut
-    ) external returns (uint256 amountOut) {
+    function swap(address tokenIn, uint256 amountIn, uint256 minAmountOut) external returns (uint256 amountOut) {
         bool isTokenA = tokenIn == address(tokenA);
         require(isTokenA || tokenIn == address(tokenB), "Invalid token");
 
@@ -171,16 +126,10 @@ contract NexusSwapAMM {
         IERC20(tokenIn).transferFrom(msg.sender, address(this), amountIn);
 
         // Interaction: Send tokens out
-        IERC20(isTokenA ? address(tokenB) : address(tokenA)).transfer(
-            msg.sender,
-            amountOut
-        );
+        IERC20(isTokenA ? address(tokenB) : address(tokenA)).transfer(msg.sender, amountOut);
 
         // Update Reserves
-        _update(
-            tokenA.balanceOf(address(this)),
-            tokenB.balanceOf(address(this))
-        );
+        _update(tokenA.balanceOf(address(this)), tokenB.balanceOf(address(this)));
 
         emit Swap(msg.sender, tokenIn, amountIn, amountOut);
     }
